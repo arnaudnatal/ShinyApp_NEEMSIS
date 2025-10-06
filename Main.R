@@ -7,7 +7,7 @@
 
 
 ########## Initialisation
-setwd("C:/Users/Arnaud/Documents/GitHub/Shiny_NEEMSIS")
+setwd("C:/Users/Arnaud/Documents/GitHub/ShinyApp_NEEMSIS")
 
 
 ########## Install
@@ -46,13 +46,22 @@ library(dplyr)
 
 
 
+# ------------------- Load data -------------------
+data <- read_excel("households.xlsx")
+data <- data %>% mutate(across(where(is.character), as.factor))
+
+factor_cols_all <- names(Filter(is.factor, data))
+
+
+
+
 
 # ------------------- UI -------------------
 ui <- fluidPage(
   titlePanel("NEEMSIS Data Explorer"),
   sidebarLayout(
     sidebarPanel(
-      selectInput("var1", "Choose variable to analyse (qualitative or quantitative):",
+      selectInput("var1", "Variable to analyse:",
                   choices = names(data)),
       uiOutput("group1_ui"),
       uiOutput("group2_ui"),
@@ -74,7 +83,7 @@ server <- function(input, output, session) {
   output$group1_ui <- renderUI({
     choices <- factor_cols_all
     if (!is.null(input$var1) && input$var1 %in% choices) choices <- setdiff(choices, input$var1)
-    selectInput("group1", "Group by var-1 (optional)", choices=c("None", choices), selected="None")
+    selectInput("group1", "Group by (optional)", choices=c("None", choices), selected="None")
   })
   
   output$group2_ui <- renderUI({
@@ -82,7 +91,7 @@ server <- function(input, output, session) {
     g1 <- input$group1
     if (!is.null(input$var1) && input$var1 %in% choices) choices <- setdiff(choices, input$var1)
     if (!is.null(g1) && g1 != "None") choices <- setdiff(choices, g1)
-    selectInput("group2", "Group by var-2 (optional)", choices=c("None", choices), selected="None")
+    selectInput("group2", "Group by (optional)", choices=c("None", choices), selected="None")
   })
   
   # --- Plot options for numeric var1 ---
